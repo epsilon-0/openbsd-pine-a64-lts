@@ -13,11 +13,12 @@ I am going to assume that this is the first ever SoC computer that you have ever
 - [Pine A64-LTS](https://www.pine64.org/?product=pine-a64-lts) (also maybe get a [power supply](https://www.pine64.org/?product=sopine-baseboard-us-power-supply))
 - [USB to TTL converter](https://www.amazon.com/gp/product/B008AGDTA4/) (cp2102)(needed for serial console access)
 - micro-sd card (+ card reader, for being able to read the micro-sd card on your laptop/desktop)
-- Access to another (unix/linux) computer for formatting/writing to the micro-sd card
-
-# (current basic outline)
+- Access to another (unix/linux) computer for formatting/writing to the micro-sd card (I am going to install OpenBSD on the pine using an Ubuntu laptop, so the tty/mmcblk devices will be reflecting the linux nomenclature).
 
 ## (1) Flashing miniroot65.fs
+- Download [`miniroot65.fs`](https://cdn.openbsd.org/pub/OpenBSD/6.5/arm64/miniroot65.fs) for the `arm64` machines (Pine A64 is one of these).
+- Put the micro-sd card in your reader and connect it to the laptop
+-- If this is the only sd card, it is found on `/dev/mmcblk0` (at least for my ubuntu machine)
 
 ## (2) Adding `sun50i-a64-pine64-lts.dtb`
 
