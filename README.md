@@ -17,19 +17,65 @@ I am going to assume that this is the first ever SoC computer that you have ever
 
 ## (1) Flashing miniroot65.fs
 - Download [`miniroot65.fs`](https://cdn.openbsd.org/pub/OpenBSD/6.5/arm64/miniroot65.fs) for the `arm64` machines (Pine A64 is one of these).
-- Put the micro-sd card in your reader and connect it to the laptop
--- If this is the only sd card, it is found on `/dev/mmcblk0` (at least for my ubuntu machine)
+- Put the micro-sd card in your reader and connect it to the laptop. Make sure the the partitions are **unmounted**.
+- - If this is the only mirco-sd card and in a dedicated card reader, it is found on `/dev/mmcblk0`
+- Flash the miniroot65.fs:
+    ```
+    dd if=miniroo65.fs of=/dev/mmcblk0 bs=1M status=progress
+    ```
+- After flashing you will get a BOOT partition of 4MB in size and a `ufs` partition of 14MB in size
+- Download https://ftp.openbsd.org/pub/OpenBSD/6.5/packages/amd64/u-boot-aarch64-2019.01p5.tgz and extract `.../share/u-boot/pine64-lts/u-boot-sunxi-with-spl.bin`
+- Flash the file `u-boot-sunxi-with-spl.bin` with the correct batch size and seek:
+    ```
+    dd if=u-boot-sunxi-with-spl.bin of=/dev/mmcblk0 bs=1024 seek=8
+    ```
+- - The seek is to format the starting of the `ufs` partition so that the machine can boot correctly.
 
 ## (2) Adding `sun50i-a64-pine64-lts.dtb`
+- Download https://ftp.openbsd.org/pub/OpenBSD/6.5/packages/amd64/dtb-4.20.tgz and extract `.../share/dtb/arm64/allwinner/sun50i-a64-pine64-lts.dtb`
+- Mount the BOOT partition of the micro-sd card and copy the `*.dtb` file into a folder called `allwinner`, and make a copy of ALL FILES in the boot partition (we are going to need them in step 4)
+    ```
+    mkdir -p /tmp/tmpmnt
+    mount /dev/mmcblk0p1 /tmp/tmpmnt
+    mkdir -p /tmp/tmpmnt/allwinner
+    cp sun50i-a64-pine64-lts.dtb /tmp/tmpmnt/allwinner
+    mkdir ~/bootcopy
+    cp -r /tmp/tmpmnt ~/
+    umount /tmp/tmpmnt
 
-## (3) Flashing `u-boot-sunxi-with-spl.bin`
+    ```
 
-## (4) Boot and install OpenBSD
+## (3) Boot and install OpenBSD
+- Insert the micro-sd card into the pine.
+- OpenBSD does not support HDMI I/O for the Pine A64 LTS (or any other SoC for that matter) so you need to connect using a serial console (the usb to ttl conenctor)
+- This is a [UART connector](http://linux-sunxi.org/File:Pine64_UART0.jpg) for the pine, connect it to the RIGHT side pins, as shown in the picture
+- - THE TXD connects to the RXD pin and the RXD connects to the TXD pin [RXD - receiver, TXD - transmitter]
+- - Connecting to the left hand side can mess up voltages
+- - Information from https://chown.me/blog/playing-with-the-pine64.html
 
-## (5) Re-add `u-boot.bin` and `sun50i-a64-pine64-lts.dtb`
+- Connect the usb to your machine and to access the console you can use two commands `cu` or `screen`
+- I will be using `screen` as that comes default in most linux distributions
+- The serial console attaches itself to `ttyUSB0` in most cases and can be connect via
+    ```
+    screen /dev/ttyUSB0 115200
+    ```
+- - Don't forget to hard-boot the machine after connecting the serial console so that you can begin the boot process
 
-## (6) Re-flash `u-boot-sunxi-with-spl.bin`
+## (4) Re-add `u-boot.bin` and `sun50i-a64-pine64-lts.dtb` and flash `u-boot-sunxi-with-spl.bin`
+- Now that you have finished the installation on `sd0`, if you try to reboot the machine you will end up with the following error
+    ```
+    DRAM: 0 MiB
+    ### ERROR ### Please RESET the board ###
+    ```
+- The reason is that the installation removes the `u-boot.bin` and the `sun50i-a64-pine64-lts.dtb` files from the BOOT partition
+- Remove the micro-sd card from the pine and connect it to your laptop (you can safely remove the card when the above error is showing)
+- Now we need to copy all the files from step 2 back into the boot directory
+    ```
+    mkdir -p tmp/tmpmnt
+    mount /dev/mmcblk0p1 /tmp/tmpmnt
+    cp -r ~/tmpmnt/* /tmp/tmpmnt
+    umount /tmp/tmpmnt
+    dd if=u-boot-sunxi-with-spl.bin of=/dev/mmcblk0 bs=1024 seek=8
+    ```
 
 ## Enjoy
-
-TODO: Finish up the write-up
