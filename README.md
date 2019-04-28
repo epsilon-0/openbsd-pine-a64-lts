@@ -18,7 +18,7 @@ I am going to assume that this is the first ever SoC computer that you have ever
 ## (1) Flashing miniroot65.fs
 - Download [`miniroot65.fs`](https://cdn.openbsd.org/pub/OpenBSD/6.5/arm64/miniroot65.fs) for the `arm64` machines (Pine A64 is one of these).
 - Put the micro-sd card in your reader and connect it to the laptop. Make sure the the partitions are **unmounted**.
-- - If this is the only mirco-sd card and in a dedicated card reader, it is found on `/dev/mmcblk0`
+  - If this is the only mirco-sd card and in a dedicated card reader, it is found on `/dev/mmcblk0`
 - Flash the miniroot65.fs:
     ```
     dd if=miniroo65.fs of=/dev/mmcblk0 bs=1M status=progress
@@ -29,7 +29,7 @@ I am going to assume that this is the first ever SoC computer that you have ever
     ```
     dd if=u-boot-sunxi-with-spl.bin of=/dev/mmcblk0 bs=1024 seek=8
     ```
-- - The seek is to format the starting of the `ufs` partition so that the machine can boot correctly.
+  - The seek is to format the starting of the `ufs` partition so that the machine can boot correctly.
 
 ## (2) Adding `sun50i-a64-pine64-lts.dtb`
 - Download https://ftp.openbsd.org/pub/OpenBSD/6.5/packages/amd64/dtb-4.20.tgz and extract `.../share/dtb/arm64/allwinner/sun50i-a64-pine64-lts.dtb`
@@ -49,9 +49,9 @@ I am going to assume that this is the first ever SoC computer that you have ever
 - Insert the micro-sd card into the pine.
 - OpenBSD does not support HDMI I/O for the Pine A64 LTS (or any other SoC for that matter) so you need to connect using a serial console (the usb to ttl conenctor)
 - This is a [UART connector](http://linux-sunxi.org/File:Pine64_UART0.jpg) for the pine, connect it to the RIGHT side pins, as shown in the picture
-- - THE TXD connects to the RXD pin and the RXD connects to the TXD pin [RXD - receiver, TXD - transmitter]
-- - Connecting to the left hand side can mess up voltages
-- - Information from https://chown.me/blog/playing-with-the-pine64.html
+  - THE TXD connects to the RXD pin and the RXD connects to the TXD pin [RXD - receiver, TXD - transmitter]
+  - Connecting to the left hand side can mess up voltages
+  - Information from https://chown.me/blog/playing-with-the-pine64.html
 
 - Connect the usb to your machine and to access the console you can use two commands `cu` or `screen`
 - I will be using `screen` as that comes default in most linux distributions
@@ -59,7 +59,7 @@ I am going to assume that this is the first ever SoC computer that you have ever
     ```
     screen /dev/ttyUSB0 115200
     ```
-- - Don't forget to hard-boot the machine after connecting the serial console so that you can begin the boot process
+  - Don't forget to hard-boot the machine after connecting the serial console so that you can begin the boot process
 
 ## (4) Re-add `u-boot.bin` and `sun50i-a64-pine64-lts.dtb` and flash `u-boot-sunxi-with-spl.bin`
 - Now that you have finished the installation on `sd0`, if you try to reboot the machine you will end up with the following error
