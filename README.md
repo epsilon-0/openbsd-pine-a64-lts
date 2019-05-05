@@ -29,7 +29,7 @@ I am going to assume that this is the first ever SoC computer that you have ever
     ```
     dd if=u-boot-sunxi-with-spl.bin of=/dev/mmcblk0 bs=1024 seek=8
     ```
-  - The seek is to format the starting of the `ufs` partition so that the machine can boot correctly.
+  - The seek is to format the starting of the disk so that the machine can boot correctly.
 
 ## (2) Adding `sun50i-a64-pine64-lts.dtb`
 - Download https://ftp.openbsd.org/pub/OpenBSD/6.5/packages/amd64/dtb-4.20.tgz and extract `.../share/dtb/arm64/allwinner/sun50i-a64-pine64-lts.dtb`
