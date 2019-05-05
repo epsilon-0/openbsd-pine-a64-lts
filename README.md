@@ -21,7 +21,7 @@ I am going to assume that this is the first ever SoC computer that you have ever
   - If this is the only mirco-sd card and in a dedicated card reader, it is found on `/dev/mmcblk0`
 - Flash the miniroot65.fs:
     ```
-    dd if=miniroo65.fs of=/dev/mmcblk0 bs=1M status=progress
+    dd if=miniroot65.fs of=/dev/mmcblk0 bs=1M status=progress
     ```
 - After flashing you will get a BOOT partition of 4MB in size and a `ufs` partition of 14MB in size
 - Download https://ftp.openbsd.org/pub/OpenBSD/6.5/packages/amd64/u-boot-aarch64-2019.01p5.tgz and extract `.../share/u-boot/pine64-lts/u-boot-sunxi-with-spl.bin`
@@ -39,10 +39,8 @@ I am going to assume that this is the first ever SoC computer that you have ever
     mount /dev/mmcblk0p1 /tmp/tmpmnt
     mkdir -p /tmp/tmpmnt/allwinner
     cp sun50i-a64-pine64-lts.dtb /tmp/tmpmnt/allwinner
-    mkdir ~/bootcopy
     cp -r /tmp/tmpmnt ~/
     umount /tmp/tmpmnt
-
     ```
 
 ## (3) Boot and install OpenBSD
