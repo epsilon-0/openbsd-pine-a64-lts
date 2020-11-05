@@ -1,41 +1,53 @@
 # Installing OpenBSD (-current) on the Pine A64-LTS model
 
-This is a short and VERY specific guide for installing the OpenBSD latest snapshot on the [Pine A64-LTS](https://www.pine64.org/?product=pine-a64-lts) SoC board. The official installation instructions are present [here](https://ftp.openbsd.org/pub/OpenBSD/snapshots/arm64/INSTALL.arm64), but they are unforunately not enough for our current board. There are a lot of nuances in this installation, from the standard flashing and booting.
+This is a short guide for installing the OpenBSD latest snapshot on the [Pine A64-LTS](https://pine64.com/product/pine-a64-lts/?v=0446c16e2e66) SoC board.<br/>
+The official installation instructions are present [here](https://ftp.openbsd.org/pub/OpenBSD/snapshots/arm64/INSTALL.arm64).
 
-## A brief outline of the installation:
-- Flashing miniroot onto the micro-sd card
-- Adding the appropriate `*.dtb` file (the device tree file) to the micro-sd card and flashing.
-- Booting and installing OpenBSD
-- Readding the files and flashing the BOOT partition
+<table>
+<tr>
+<td width="27%" style="border-style:solid; border-radius:10px;">
 
-## Requirements
-I am going to assume that this is the first ever SoC computer that you have ever seen in life and have no freaking clue how to even connect to this device. I am doing this because this was my exact state a few weeks before and there were no comprehensive tutorials around. I am aiming this guide to be a good introduction to working with SoC boards, along with what components are needed and how to connect (via a serial console)
-- [Pine A64-LTS](https://store.pine64.org/?product=pine-a64-lts) (also maybe get a [power supply](https://store.pine64.org/?product=pine-a64-usa-power-supply))
-- [USB to TTL converter](https://store.pine64.org/?product=pinebook-serial-console) (cp2102)(needed for serial console access, if you forgot to order from them you can also order off of [amazon](https://www.amazon.com/gp/product/B008AGDTA4/))
-- micro-sd card (+ card reader, for being able to read the micro-sd card on your laptop/desktop)
-- Access to another (unix/linux) computer for formatting/writing to the micro-sd card (I am going to install OpenBSD on the pine using an Ubuntu laptop, so the tty/mmcblk devices will be reflecting the linux nomenclature).
+## Contents
 
-## (1) Flashing minirootXX.fs
-- Download [`minirootXX.fs`](https://ftp.openbsd.org/pub/OpenBSD/snapshots/arm64/) for the `arm64` machines (Pine A64 is one of these).
-- Put the micro-sd card in your reader and connect it to the laptop. Make sure the the partitions are **unmounted**.
-  - If this is the only mirco-sd card and in a dedicated card reader, it is found on `/dev/mmcblk0`
-- Flash the minirootXX.fs:
+0. [Requirements](#requirements)
+1. [Flash `minirootXX.img`](#flash)
+2. [Add `*.dtb` file](#dtb)
+3. [Boot and install OpenBSD](#boot)
+4. [Readd and reflash BOOT partition](#reflash)
+
+</td>
+</tr>
+</table>
+
+## Requirements <a name="requirements"></a>
+This guide assumes that this is the first ever SoC computer that the reader has ever seen in life and has no clue how to even connect to this device.<br/>
+This guide is designed for a basic introduction to working with SoC boards, along with the components needed for connecting (via a serial console):
+- [Pine A64-LTS](https://pine64.com/product/pine-a64-lts/?v=0446c16e2e66) (along with a [power supply](https://pine64.com/?product=pine-a64-usa-power-supply&v=0446c16e2e66))
+- [USB to TTL converter](https://store.pine64.org/?product=pinebook-serial-console) (cp2102)(needed for serial console access, also available on [amazon](https://www.amazon.com/gp/product/B008AGDTA4/))
+- micro-sd card (+ card reader, to read the micro-sd card from laptop/desktop)
+- Access to another (unix/linux) computer for writing to the micro-sd card (this guide uses a linux computer to install OpenBSD on the pine, so the tty/mmcblk devices will be reflecting the linux nomenclature).
+
+## Flash `minirootXX.img` <a name="flash"></a>
+- Download [`minirootXX.img`](https://ftp.openbsd.org/pub/OpenBSD/snapshots/arm64/) for the `arm64` machines (Pine A64 is an armv8/aarch64 machine).
+- Put the micro-sd card in the card reader and connect it to the laptop. Make sure the the partitions are **unmounted**.
+  - If this is the only mirco-sd card and in a dedicated card reader, it will most likely be found on `/dev/mmcblk0`
+- Flash the `minirootXX.img`:
     ```
-    dd if=minirootXX.fs of=/dev/mmcblk0 bs=1M status=progress
+    dd if=minirootXX.img of=/dev/mmcblk0 bs=1M status=progress
     ```
-- After flashing you will get a BOOT partition of 4MB in size and a `ufs` partition of 14MB in size
-- Download u-boot-aarch64-YYYY.MMpX.tgz from https://ftp.openbsd.org/pub/OpenBSD/snapshots/packages/amd64/ and extract the file `.../share/u-boot/pine64-lts/u-boot-sunxi-with-spl.bin`
+- After flashing there will be BOOT partition of size 4MB i and a `ufs` partition of size 14MB.
+- Download `u-boot-aarch64-YYYY.MMpX.tgz` from https://ftp.openbsd.org/pub/OpenBSD/snapshots/packages/amd64/ and extract the file `.../share/u-boot/pine64-lts/u-boot-sunxi-with-spl.bin`
 - Flash the file `u-boot-sunxi-with-spl.bin` with the correct batch size and seek:
     ```
     dd if=u-boot-sunxi-with-spl.bin of=/dev/mmcblk0 bs=1024 seek=8
     ```
   - The seek is to format the starting of the disk so that the machine can boot correctly.
   
-NOTE: we are downloading from the `amd64` link, even though we are working on an `arm64` machine. This is fine as the package is actually a `arm64` package, we are only using the `amd64` links cuz they are generally updated and compiled more frequently.
+NOTE: The download links are for `amd64`, even though the machine is `arm64`, as the package is actually an `arm64` package. The `amd64` links are used as they are updated and compiled more frequently.
 
-## (2) Adding `sun50i-a64-pine64-lts.dtb`
-- Download the file dtb-X.YYpZ.tgz https://ftp.openbsd.org/pub/OpenBSD/snapshots/packages/amd64/ and extract the file `.../share/dtb/arm64/allwinner/sun50i-a64-pine64-lts.dtb`
-- Mount the BOOT partition of the micro-sd card and copy the `*.dtb` file into a folder called `allwinner`, and make a copy of ALL FILES in the boot partition (we are going to need them again in step 4, so we make a backup)
+## Add `sun50i-a64-pine64-lts.dtb` <a name="dtb"></a>
+- Download the file `dtb-X.YYpZ.tgz` from https://ftp.openbsd.org/pub/OpenBSD/snapshots/packages/amd64/ and extract the file `.../share/dtb/arm64/allwinner/sun50i-a64-pine64-lts.dtb`
+- Mount the BOOT partition of the micro-sd card and copy the `*.dtb` file into a folder called `allwinner`, and make a copy of **ALL FILES** in the boot partition (needed again in step 4, so this creates a backup):
     ```
     mkdir -p /tmp/tmpmnt
     mount /dev/mmcblk0p1 /tmp/tmpmnt
@@ -45,14 +57,13 @@ NOTE: we are downloading from the `amd64` link, even though we are working on an
     umount /tmp/tmpmnt
     ```
 
-## (3) Boot and install OpenBSD
+## Boot and install OpenBSD <a name="boot"></a>
 - Insert the micro-sd card into the pine.
-- OpenBSD does not support HDMI I/O for the Pine A64 LTS (or any other SoC for that matter) so you need to connect using a serial console (the usb to ttl conenctor)
-- This is a [UART connector](http://linux-sunxi.org/File:Pine64_UART0.jpg) for the pine, connect it to the RIGHT side pins, as shown in the picture
-  - THE TXD pin of the connector connects to the RXD pin of the board and the RXD connects to the TXD pin [RXD - receiver, TXD - transmitter]
-  - Connecting to the left hand side can mess up voltages
-  - While the computer is booting remove the TXD pin of the board (this should result in you not being able to send any data to the board but you can reconnect the wire after booting has finished, as connecting the wire during the boot phase can mess up voltages)
-  - Information from https://chown.me/blog/playing-with-the-pine64.html
+- OpenBSD does not support HDMI I/O for the Pine A64 LTS so a serial console (the usb to ttl conenctor) is needed to connect to the board.
+- This is the [UART connector](http://linux-sunxi.org/File:Pine64_UART0.jpg) for the pine, connect it to the RIGHT side pins, as shown in the picture (connecting to the left side can mess up voltages).
+  - THE TXD pin of the connector connects to the RXD pin of the board and the RXD connects to the TXD pin [RXD - receiver, TXD - transmitter].
+  - Remove the RXD pin of the board before booting. This means no data can be sent while booting. Connecting the wire during the boot phase can mess up voltages. 
+  - Reconnect the RXD pin of the board after booting has finished.
 
 - Connect the usb to your machine and to access the console you can use two commands `cu` or `screen`
 - I will be using `screen` as that comes default in most linux distributions
@@ -62,7 +73,7 @@ NOTE: we are downloading from the `amd64` link, even though we are working on an
     ```
   - Don't forget to hard-boot the machine after connecting the serial console so that you can begin the boot process
 
-## (4) Re-add `u-boot.bin` and `sun50i-a64-pine64-lts.dtb` and flash `u-boot-sunxi-with-spl.bin`
+## Re-add `u-boot.bin` and `sun50i-a64-pine64-lts.dtb` and re-flash `u-boot-sunxi-with-spl.bin` <a name="reflash"></a>
 - Now that you have finished the installation on `sd0`, if you try to reboot the machine you will end up with the following error
     ```
     DRAM: 0 MiB
