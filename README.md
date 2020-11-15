@@ -81,11 +81,13 @@ NOTE: The download links are for `amd64`, even though the machine is `arm64`, as
     ```
 - The reason is that the installation removes the `u-boot.bin` and the `sun50i-a64-pine64-lts.dtb` files from the BOOT partition
 - Remove the micro-sd card from the pine and connect it to your laptop (you can safely remove the card when the above error is showing)
-- Now we need to copy all the files from step 2 back into the boot directory
+- Now we need to copy all the files from step 2 back into the boot directory, while making sure that other vender `*.dtb` files are **not** present.
+    - Anecdotal personal experience - having rpi `*dtb` files has made the `bsd.mp` kernel hang while booting, `bsd.sp` kernel still boots fine.
     ```
     mkdir -p tmp/tmpmnt
     mount /dev/mmcblk0p1 /tmp/tmpmnt
     cp -r ~/tmpmnt/* /tmp/tmpmnt
+    rm -f /tmp/tmpmnt/*.dtb
     umount /tmp/tmpmnt
     dd if=u-boot-sunxi-with-spl.bin of=/dev/mmcblk0 bs=1024 seek=8
     ```
